@@ -16,7 +16,7 @@ Patch1:         0002-Remove-test-deps.patch
 BuildArch:      noarch
 
 BuildRequires:  java-devel
-BuildRequires:  jpackage-utils >= 0:1.7.2
+BuildRequires:  jpackage-utils >= 0:1.7.5
 BuildRequires:  maven-doxia-sitetools
 BuildRequires:  maven-plugin-bundle
 BuildRequires:  maven-surefire-maven-plugin
@@ -60,8 +60,8 @@ Requires:  jakarta-commons-pool
 Requires:  xerces-j2
 Requires:  xml-commons-apis
 
-Requires(post):   jpackage-utils >= 1.7.2
-Requires(postun): jpackage-utils >= 1.7.2
+Requires(post):   jpackage-utils >= 0:1.7.5
+Requires(postun): jpackage-utils >= 0:1.7.5
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -84,7 +84,7 @@ similar to how AbstractList works.
 %package        javadoc
 Summary:        API documentation for %{name}
 Group:          Development/Java
-Requires:       jpackage-utils
+Requires:       jpackage-utils >= 0:1.7.5
 
 Provides:       jakarta-%{short_name}-javadoc = 0:%{version}-%{release}
 Obsoletes:      jakarta-%{short_name}-javadoc < 0:%{version}-%{release}
