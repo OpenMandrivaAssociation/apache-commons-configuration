@@ -4,7 +4,7 @@
 
 Name:           apache-%{short_name}
 Version:        1.6
-Release:        5
+Release:        6
 Summary:        Commons Configuration Package
 
 Group:          Development/Java
