@@ -1,72 +1,50 @@
-
+%{?_javapackages_macros:%_javapackages_macros}
 %global base_name       configuration
 %global short_name      commons-%{base_name}
 
 Name:           apache-%{short_name}
-Version:        1.6
-Release:        8
+Version:        1.9
+Release:        6.1%{?dist}
 Summary:        Commons Configuration Package
 
-Group:          Development/Java
+
 License:        ASL 2.0
 URL:            http://commons.apache.org/%{base_name}/
-Source0:        http://www.apache.org/dist/commons/%{base_name}/source/%{short_name}-%{version}-src.tar.gz
-Patch0:         0001-Change-ant-groupId-to-org.apache.ant.patch
-Patch1:         0002-Remove-test-deps.patch
+Source0:        http://archive.apache.org/dist/commons/%{base_name}/source/%{short_name}-%{version}-src.tar.gz
 BuildArch:      noarch
 
+BuildRequires:  maven-local
 BuildRequires:  java-devel
-BuildRequires:  jpackage-utils >= 0:1.7.2
+BuildRequires:  jpackage-utils
+BuildRequires:  maven-antrun-plugin
+BuildRequires:  maven-assembly-plugin
+BuildRequires:  maven-compiler-plugin
 BuildRequires:  maven-doxia-sitetools
+BuildRequires:  maven-install-plugin
+BuildRequires:  maven-jar-plugin
+BuildRequires:  javacc-maven-plugin
+BuildRequires:  maven-javadoc-plugin
 BuildRequires:  maven-plugin-bundle
-BuildRequires:  maven-surefire-maven-plugin
+BuildRequires:  maven-resources-plugin
+BuildRequires:  maven-surefire-plugin
 BuildRequires:  maven-surefire-provider-junit
-BuildRequires:  maven2-plugin-antrun
-BuildRequires:  maven2-plugin-assembly
-BuildRequires:  maven2-plugin-compiler
-BuildRequires:  maven2-plugin-idea
-BuildRequires:  maven2-plugin-install
-BuildRequires:  maven2-plugin-jar
-BuildRequires:  maven2-plugin-javadoc
-BuildRequires:  maven2-plugin-resources
-BuildRequires:  maven
 
-BuildRequires:  xalan-j2
-BuildRequires:  xerces-j2
-BuildRequires:  xml-commons-apis
-BuildRequires:  apache-commons-beanutils >= 0:1.7.0
+BuildRequires:  apache-commons-beanutils
 BuildRequires:  apache-commons-codec
+BuildRequires:  apache-commons-collections
+BuildRequires:  apache-commons-digester
+BuildRequires:  apache-commons-jexl
+BuildRequires:  apache-commons-jxpath
 BuildRequires:  apache-commons-lang
 BuildRequires:  apache-commons-logging
-# convert to apache-commons when transition is done
-BuildRequires:  apache-commons-collections
-BuildRequires:  jakarta-commons-dbcp
-BuildRequires:  apache-commons-digester
-BuildRequires:  apache-commons-jxpath
-BuildRequires:  jakarta-commons-pool
-BuildRequires:  servlet25
-BuildRequires:  tomcat6
+BuildRequires:  apache-commons-vfs
+BuildRequires:  tomcat-servlet-3.0-api
+BuildRequires:  xml-commons-resolver
 
-Requires:  servlet25
-Requires:  apache-commons-beanutils >= 0:1.7.0
-Requires:  apache-commons-codec
-Requires:  apache-commons-jxpath
-Requires:  apache-commons-lang
-Requires:  apache-commons-logging
-Requires:  apache-commons-collections
-Requires:  jakarta-commons-dbcp
-Requires:  apache-commons-digester
-Requires:  jakarta-commons-pool
-Requires:  xerces-j2
-Requires:  xml-commons-apis
-
-Requires(post):   jpackage-utils >= 1.7.2
-Requires(postun): jpackage-utils >= 1.7.2
-
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 Provides:       jakarta-%{short_name} = 0:%{version}-%{release}
 Obsoletes:      jakarta-%{short_name} < 0:%{version}-%{release}
+
 
 %description
 Configuration is a project to provide a generic Configuration
@@ -83,7 +61,7 @@ similar to how AbstractList works.
 
 %package        javadoc
 Summary:        API documentation for %{name}
-Group:          Development/Java
+
 Requires:       jpackage-utils
 
 Provides:       jakarta-%{short_name}-javadoc = 0:%{version}-%{release}
@@ -95,56 +73,129 @@ Obsoletes:      jakarta-%{short_name}-javadoc < 0:%{version}-%{release}
 
 %prep
 %setup -q -n %{short_name}-%{version}-src
-%patch0 -p1
-%patch1 -p1
-%{__sed} -i 's/\r//' LICENSE.txt
+%{__sed} -i 's/\r//' LICENSE.txt NOTICE.txt
 
 %build
-# we skip tests because we don't have test deps
-mvn-rpmbuild -Dmaven.test.skip=true \
-        install javadoc:javadoc
+%mvn_file   : %{short_name} %{name}
+%mvn_alias  : org.apache.commons:%{short_name}
+# We skip tests because we don't have test deps (dbunit in particular).
+%mvn_build -f
 
 %install
-# jars
-install -d -m 755 %{buildroot}%{_javadir}
-install -p -m 644 target/%{short_name}-%{version}.jar %{buildroot}%{_javadir}/%{name}.jar
-ln -sf %{name}.jar %{buildroot}%{_javadir}/%{short_name}.jar
+%mvn_install
+
+%files -f .mfiles
+%doc LICENSE.txt NOTICE.txt
+
+%files javadoc -f .mfiles-javadoc
+%doc LICENSE.txt NOTICE.txt
 
 
-# javadoc
-install -d -m 755 %{buildroot}%{_javadocdir}/%{name}
-cp -pr target/site/apidocs/* %{buildroot}%{_javadocdir}/%{name}
+%changelog
+* Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.9-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
 
-# Install pom
-install -d -m 755 %{buildroot}%{_mavenpomdir}
-install -pm 644 pom.xml %{buildroot}/%{_mavenpomdir}/JPP-%{short_name}.pom
-%add_to_maven_depmap org.apache.commons %{short_name} %{version} JPP %{short_name}
+* Mon Apr 29 2013 Mikolaj Izdebski <mizdebsk@redhat.com> - 1.9-5
+- Remove unneeded BR: maven-idea-plugin
 
-# following line is only for backwards compatibility. New packages
-# should use proper groupid org.apache.commons and also artifactid
-%add_to_maven_depmap %{short_name} %{short_name} %{version} JPP %{short_name}
+* Wed Feb 13 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.9-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
 
-%pre javadoc
-# workaround for rpm bug, can be removed in F-17
-[ $1 -gt 1 ] && [ -L %{_javadocdir}/%{name} ] && \
-rm -rf $(readlink -f %{_javadocdir}/%{name}) %{_javadocdir}/%{name} || :
+* Wed Feb 06 2013 Java SIG <java-devel@lists.fedoraproject.org> - 1.9-3
+- Update for https://fedoraproject.org/wiki/Fedora_19_Maven_Rebuild
+- Replace maven BuildRequires with maven-local
 
-%post
-%update_maven_depmap
+* Tue Jan 15 2013 Michal Srb <msrb@redhat.com> - 1.9-2
+- Build with xmvn
 
-%postun
-%update_maven_depmap
+* Thu Aug 23 2012 Mikolaj Izdebski <mizdebsk@redhat.com> - 1.9-1
+- Update to upstream version 1.9
+- Update to currennt packaging guidelines
 
-%files
-%defattr(-,root,root,-)
-%{_mavendepmapfragdir}/*
-%{_mavenpomdir}/JPP-%{short_name}.pom
-%doc LICENSE.txt
-%{_javadir}/*.jar
+* Wed Jul 18 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.8-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
 
-%files javadoc
-%defattr(-,root,root,-)
-%doc LICENSE.txt
-%doc %{_javadocdir}/%{name}
+* Tue Jun 19 2012 Mikolaj Izdebski <mizdebsk@redhat.com> - 1.8-1
+- Update to upstream 1.8
+- Install NOTICE.txt file
 
+* Wed Apr 18 2012 Alexander Kurtakov <akurtako@redhat.com> 1.6-7
+- Update to current guidelines.
+- Move to servlet 3.
 
+* Thu Jan 12 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.6-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
+
+* Tue Feb 15 2011 Stanislav Ochotnicky <sochotnicky@redhat.com> - 1.6-5
+- Change ant dep groupId to org.apache.ant to fix build
+- Versionless jar & javadocs
+- Use maven 3 to build
+
+* Mon Feb 07 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.6-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
+
+* Thu Oct 14 2010 Stanislav Ochotnicky <sochotnicky@redhat.com> - 1.6-3
+- tomcat5 -> tomcat6 BRs/Rs
+- jakarta -> apache BRs/Rs
+
+* Thu Jul  8 2010 Stanislav Ochotnicky <sochotnicky@redhat.com> - 1.6-2
+- Add license to javadoc subpackage
+
+* Thu May 27 2010 Stanislav Ochotnicky <sochotnicky@redhat.com> - 1.6-1
+- Rename package (jakarta-commons-configuration->apache-commons-configuration)
+- Build with maven instead of ant, drop deprecated patches
+- Rebase, cleanups, drop epoch
+
+* Thu Aug 20 2009 Alexander Kurtakov <akurtako@redhat.com> 0:1.4-7
+- Fix description.
+- Remove requires(post/postun) for javadoc subpackage.
+- Use sed instead of dos2unix.
+
+* Thu Aug 20 2009 Alexander Kurtakov <akurtako@redhat.com> 0:1.4-6
+- Remove gcj support.
+- Initial build for Fedora.
+
+* Mon May 18 2009 Fernando Nasser <fnasser@redhat.com> - 0:1.4-5
+- Fix license
+- Fix source URL
+
+* Wed Mar 18 2009 Yong Yang <yyang@redhat.com> - 0:1.4-4
+- rebuild with new maven2 2.0.8 built in bootstrap mode
+
+* Thu Feb 05 2009 Yong Yang <yyang@redhat.com> - 0:1.4-3
+- Fix release tag
+
+* Wed Jan 14 2009 Yong Yang <yyang@redhat.com> - 0:1.4-2jpp
+- Import from dbhole's maven 2.0.8 packages, initial building
+
+* Mon Aug 13 2007 Ralph Apel <r.apel at r-apel.de> - 0:1.4-1jpp
+- Upgrade to 1.4
+- Add pom file
+
+* Thu May 03 2007 Ralph Apel <r.apel at r-apel.de> - 0:1.2-3jpp
+- Patch one test
+
+* Wed Mar 07 2007 Ralph Apel <r.apel at r-apel.de> - 0:1.2-2jpp
+- Add gcj_support option
+- Optionally build without maven
+
+* Mon Feb 20 2006 Ralph Apel <r.apel at r-apel.de> - 0:1.2-1jpp
+- Upgrade to 1.2
+
+* Mon Feb 20 2006 Ralph Apel <r.apel at r-apel.de> - 0:1.1-2jpp
+- Rebuild for JPP-1.7 and maven-1.1
+
+* Thu Sep 15 2005 Ralph Apel <r.apel at r-apel.de> - 0:1.1-1jpp
+- Upgrade to 1.1
+- Omit findbugs and tasks reports: don't have these plugins yet
+- Requires java 1.4.2 to build
+
+* Mon Feb 21 2005 Ralph Apel <r.apel at r-apel.de> - 0:1.0.f-1jpp
+- Upgrade to 1.0 final, letter in version can be bumped with 1.1
+- Prepare for build with maven, but still build with ant
+
+* Sun Aug 23 2004 Randy Watler <rwatler at finali.com> - 0:1.0.d3-2jpp
+- Rebuild with ant-1.6.2
+- Upgrade to Ant 1.6.X
+* Mon Jan 19 2004 Ralph Apel <r.apel at r-apel.de> - 0:1.0.d3-1jpp
+- First JPackage release
