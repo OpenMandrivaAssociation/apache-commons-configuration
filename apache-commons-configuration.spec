@@ -3,10 +3,10 @@
 %global short_name      commons-%{base_name}
 
 Name:           apache-%{short_name}
-Version:        1.9
-Release:        6.1%{?dist}
+Version:        1.10
+Release:        3.1
+Group:		Development/Java
 Summary:        Commons Configuration Package
-
 
 License:        ASL 2.0
 URL:            http://commons.apache.org/%{base_name}/
@@ -14,33 +14,23 @@ Source0:        http://archive.apache.org/dist/commons/%{base_name}/source/%{sho
 BuildArch:      noarch
 
 BuildRequires:  maven-local
-BuildRequires:  java-devel
-BuildRequires:  jpackage-utils
-BuildRequires:  maven-antrun-plugin
-BuildRequires:  maven-assembly-plugin
-BuildRequires:  maven-compiler-plugin
-BuildRequires:  maven-doxia-sitetools
-BuildRequires:  maven-install-plugin
-BuildRequires:  maven-jar-plugin
-BuildRequires:  javacc-maven-plugin
-BuildRequires:  maven-javadoc-plugin
-BuildRequires:  maven-plugin-bundle
-BuildRequires:  maven-resources-plugin
-BuildRequires:  maven-surefire-plugin
-BuildRequires:  maven-surefire-provider-junit
-
-BuildRequires:  apache-commons-beanutils
-BuildRequires:  apache-commons-codec
-BuildRequires:  apache-commons-collections
-BuildRequires:  apache-commons-digester
-BuildRequires:  apache-commons-jexl
-BuildRequires:  apache-commons-jxpath
-BuildRequires:  apache-commons-lang
-BuildRequires:  apache-commons-logging
-BuildRequires:  apache-commons-vfs
-BuildRequires:  tomcat-servlet-3.0-api
-BuildRequires:  xml-commons-resolver
-
+BuildRequires:  mvn(commons-beanutils:commons-beanutils)
+BuildRequires:  mvn(commons-codec:commons-codec)
+BuildRequires:  mvn(commons-collections:commons-collections)
+BuildRequires:  mvn(commons-digester:commons-digester)
+BuildRequires:  mvn(commons-jxpath:commons-jxpath)
+BuildRequires:  mvn(commons-lang:commons-lang)
+BuildRequires:  mvn(commons-logging:commons-logging)
+BuildRequires:  mvn(javax.servlet:servlet-api)
+BuildRequires:  mvn(log4j:log4j)
+BuildRequires:  mvn(org.apache.commons:commons-jexl)
+BuildRequires:  mvn(org.apache.commons:commons-parent:pom:)
+BuildRequires:  mvn(org.apache.commons:commons-vfs2)
+BuildRequires:  mvn(org.apache.maven.plugins:maven-assembly-plugin)
+BuildRequires:  mvn(org.apache.maven.plugins:maven-source-plugin)
+BuildRequires:  mvn(org.codehaus.mojo:javacc-maven-plugin)
+BuildRequires:  mvn(xml-apis:xml-apis)
+BuildRequires:  mvn(xml-resolver:xml-resolver)
 
 Provides:       jakarta-%{short_name} = 0:%{version}-%{release}
 Obsoletes:      jakarta-%{short_name} < 0:%{version}-%{release}
@@ -61,9 +51,6 @@ similar to how AbstractList works.
 
 %package        javadoc
 Summary:        API documentation for %{name}
-
-Requires:       jpackage-utils
-
 Provides:       jakarta-%{short_name}-javadoc = 0:%{version}-%{release}
 Obsoletes:      jakarta-%{short_name}-javadoc < 0:%{version}-%{release}
 
@@ -92,6 +79,15 @@ Obsoletes:      jakarta-%{short_name}-javadoc < 0:%{version}-%{release}
 
 
 %changelog
+* Thu Jun 12 2014 Mikolaj Izdebski <mizdebsk@redhat.com> - 1.10-3
+- Fix BR on commons-parent
+
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.10-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
+* Tue Oct 29 2013 Mikolaj Izdebski <mizdebsk@redhat.com> - 1.10-1
+- Update to upstream version 1.10
+
 * Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.9-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
 
@@ -199,3 +195,4 @@ Obsoletes:      jakarta-%{short_name}-javadoc < 0:%{version}-%{release}
 - Upgrade to Ant 1.6.X
 * Mon Jan 19 2004 Ralph Apel <r.apel at r-apel.de> - 0:1.0.d3-1jpp
 - First JPackage release
+
