@@ -4,7 +4,7 @@
 
 Name:           apache-%{short_name}
 Version:        1.10
-Release:        3.2
+Release:        3.3
 Group:		Development/Java
 Summary:        Commons Configuration Package
 
